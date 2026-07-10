@@ -29,24 +29,6 @@ personality = st.sidebar.selectbox(
     ]
 )
 
-# Clear Chat History Button in Sidebar
-if st.sidebar.button("Clear Chat"):
-    st.session_state.messages = []
-    st.session_state.chat_session = None
-
-# Initialize session state variables
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "current_personality" not in st.session_state:
-    st.session_state.current_personality = personality
-
-# Reset session state on personality switch
-if st.session_state.current_personality != personality:
-    st.session_state.messages = []
-    st.session_state.chat_session = None
-    st.session_state.current_personality = personality
-
 # Define system prompts for each personality
 PERSONALITY_PROMPTS = {
     "An expert Hacker": (
@@ -70,20 +52,6 @@ PERSONALITY_PROMPTS = {
     )
 }
 
-# Initialize Gemini Chat Session
-if "chat_session" not in st.session_state or st.session_state.chat_session is None:
-    system_instruction = PERSONALITY_PROMPTS[personality]
-    try:
-        st.session_state.chat_session = client.chats.create(
-            model="gemini-2.5-flash",
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction
-            )
-        )
-    except Exception as e:
-        st.error(f"Failed to initialize Gemini Chat session: {e}")
-        st.stop()
-
 # Main Body Title
 st.title("The MULTIVERSE OF CHATBOTS")
 
@@ -92,26 +60,19 @@ with st.form(key="chat_form", clear_on_submit=True):
     user_input = st.text_input("Say something:")
     submit_button = st.form_submit_button(label="SEND")
 
-# Process submit
+# Process submit and generate response (without keeping conversation history)
 if submit_button and user_input:
-    # Append user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    
-    # Get response
     try:
-        response = st.session_state.chat_session.send_message(user_input)
-        assistant_response = response.text
-        # Append model response
-        st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+        with st.spinner("Thinking..."):
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=user_input,
+                config=types.GenerateContentConfig(
+                    system_instruction=PERSONALITY_PROMPTS[personality]
+                )
+            )
+            # Render the response
+            st.write(f"### Response from {personality}:")
+            st.write(response.text)
     except Exception as e:
         st.error(f"Error generating response: {e}")
-
-# Render chat history below the form
-if st.session_state.messages:
-    st.write("### Conversation History")
-    for msg in st.session_state.messages:
-        if msg["role"] == "user":
-            st.markdown(f"👤 **You:** {msg['content']}")
-        else:
-            st.markdown(f"🤖 **{personality}:** {msg['content']}")
-        st.write("---")
