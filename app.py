@@ -65,7 +65,7 @@ if submit_button and user_input:
     try:
         with st.spinner("Thinking..."):
             response = client.models.generate_content(
-                model="gemini-3.5-flash",
+                model="gemini-flash-latest",
                 contents=user_input,
                 config=types.GenerateContentConfig(
                     system_instruction=PERSONALITY_PROMPTS[personality]
