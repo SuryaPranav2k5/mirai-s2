@@ -15,26 +15,21 @@ if not api_key:
 client = genai.Client(api_key=api_key)
 
 # Page Config
-st.set_page_config(page_title="AI Multiverse", page_icon="🤖")
+st.set_page_config(page_title="The Multiverse of Chatbots", page_icon="🤖")
 
-st.title("🌍 AI Multiverse")
-st.write("Talk with different AI Personalities!")
-
-# Sidebar
-st.sidebar.title("Choose Personality")
-
+# Sidebar - Who do you want to talk to?
 personality = st.sidebar.selectbox(
-    "Select",
+    "Who do you want to talk to?",
     [
-        "AI Assistant",
-        "Pirate Captain",
-        "Shakespearean Poet",
-        "Tech Support Specialist",
-        "Zen Meditation Master"
+        "An expert Hacker",
+        "Stand-up Comedian",
+        "Motivational Coach",
+        "Friendly Teacher",
+        "AI Assistant"
     ]
 )
 
-# Clear Chat
+# Clear Chat History Button in Sidebar
 if st.sidebar.button("Clear Chat"):
     st.session_state.messages = []
     st.session_state.chat_session = None
@@ -46,41 +41,36 @@ if "messages" not in st.session_state:
 if "current_personality" not in st.session_state:
     st.session_state.current_personality = personality
 
-# Reset chat session and history if personality changes
+# Reset session state on personality switch
 if st.session_state.current_personality != personality:
     st.session_state.messages = []
     st.session_state.chat_session = None
     st.session_state.current_personality = personality
 
-# Map personalities to detailed system instructions
+# Define system prompts for each personality
 PERSONALITY_PROMPTS = {
+    "An expert Hacker": (
+        "You are an elite, expert hacker. Talk in cyber jargon, use terms like 'backdoor', "
+        "'firewall', 'payload', 'mainframe', speak in a mysterious cyber tone, and keep your responses tech-heavy."
+    ),
+    "Stand-up Comedian": (
+        "You are a witty stand-up comedian. Respond with funny observational jokes, dry humor, "
+        "and witty remarks based on what the user says."
+    ),
+    "Motivational Coach": (
+        "You are an intense motivational coach. Use energetic words, urge the user to achieve greatness, "
+        "use exclamation marks, and keep the energy extremely high."
+    ),
+    "Friendly Teacher": (
+        "You are a kind, encouraging school teacher. Be supportive, explain things simply, "
+        "and use warm, friendly emojis."
+    ),
     "AI Assistant": (
-        "You are a helpful, polite, and direct AI assistant. "
-        "Keep your responses helpful, clear, and concise."
-    ),
-    "Pirate Captain": (
-        "You are a salty, adventurous pirate captain. "
-        "Talk in pirate slang (use terms like 'Ahoy', 'matey', 'ye', 'scurvy dog', 'shiver me timbers'), "
-        "tell stories of the sea, and maintain a rowdy but friendly demeanor."
-    ),
-    "Shakespearean Poet": (
-        "You are a dramatic, poetic playwright from the Elizabethan era. "
-        "Speak in Shakespearean English, using 'thou', 'thee', 'thine', 'hath', and 'doth', "
-        "and try to structure your thoughts poetically, occasionally rhyming."
-    ),
-    "Tech Support Specialist": (
-        "You are a slightly cynical, pragmatic IT support specialist. "
-        "Frequently ask if the user has tried restarting their device, use tech jargon, "
-        "and express mild frustration with user errors in a humorous way."
-    ),
-    "Zen Meditation Master": (
-        "You are a calm, peaceful Zen meditation master. "
-        "Respond with gentle wisdom, advise breathing deeply, finding inner peace, "
-        "and keep your tone relaxed, short, and mindful."
+        "You are a helpful, neutral, and direct AI assistant."
     )
 }
 
-# Initialize Gemini Chat Session if not already present
+# Initialize Gemini Chat Session
 if "chat_session" not in st.session_state or st.session_state.chat_session is None:
     system_instruction = PERSONALITY_PROMPTS[personality]
     try:
@@ -94,27 +84,34 @@ if "chat_session" not in st.session_state or st.session_state.chat_session is No
         st.error(f"Failed to initialize Gemini Chat session: {e}")
         st.stop()
 
-# Display historical messages in chat view
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# Main Body Title
+st.title("The MULTIVERSE OF CHATBOTS")
 
-# Capture new user input
-if user_input := st.chat_input("Say something..."):
-    # Render user message
-    with st.chat_message("user"):
-        st.markdown(user_input)
+# Input Form (matching the screenshot layout)
+with st.form(key="chat_form", clear_on_submit=True):
+    user_input = st.text_input("Say something:")
+    submit_button = st.form_submit_button(label="SEND")
+
+# Process submit
+if submit_button and user_input:
+    # Append user message
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # Generate response from Gemini chat session
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        with st.spinner("Thinking..."):
-            try:
-                response = st.session_state.chat_session.send_message(user_input)
-                assistant_response = response.text
-                message_placeholder.markdown(assistant_response)
-                # Store response in history
-                st.session_state.messages.append({"role": "assistant", "content": assistant_response})
-            except Exception as e:
-                st.error(f"Error generating response: {e}")
+    # Get response
+    try:
+        response = st.session_state.chat_session.send_message(user_input)
+        assistant_response = response.text
+        # Append model response
+        st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+    except Exception as e:
+        st.error(f"Error generating response: {e}")
+
+# Render chat history below the form
+if st.session_state.messages:
+    st.write("### Conversation History")
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            st.markdown(f"👤 **You:** {msg['content']}")
+        else:
+            st.markdown(f"🤖 **{personality}:** {msg['content']}")
+        st.write("---")
