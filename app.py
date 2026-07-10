@@ -4,9 +4,15 @@ from google.genai import types
 from dotenv import load_dotenv
 import os
 
-# Load API Key from environment or .env file
+# Load API Key
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    st.error("Please set the GEMINI_API_KEY environment variable in your .env file to start chatting.")
+    st.stop()
+
+client = genai.Client(api_key=api_key)
 
 # Page Config
 st.set_page_config(page_title="AI Multiverse", page_icon="🤖")
@@ -14,22 +20,11 @@ st.set_page_config(page_title="AI Multiverse", page_icon="🤖")
 st.title("🌍 AI Multiverse")
 st.write("Talk with different AI Personalities!")
 
-# Sidebar Configuration
-st.sidebar.title("Configuration")
+# Sidebar
+st.sidebar.title("Choose Personality")
 
-# Fallback: Let user enter API key in sidebar if not in environment
-if not api_key:
-    api_key = st.sidebar.text_input("Enter Gemini API Key", type="password", help="Enter your Gemini API key from Google AI Studio.")
-    if not api_key:
-        st.warning("Please set the GEMINI_API_KEY environment variable (e.g. in a .env file) or enter it in the sidebar to start chatting.")
-        st.stop()
-
-# Initialize Gemini Client
-client = genai.Client(api_key=api_key)
-
-# Personality Selectbox
 personality = st.sidebar.selectbox(
-    "Select Personality",
+    "Select",
     [
         "AI Assistant",
         "Pirate Captain",
@@ -39,7 +34,7 @@ personality = st.sidebar.selectbox(
     ]
 )
 
-# Clear Chat Session
+# Clear Chat
 if st.sidebar.button("Clear Chat"):
     st.session_state.messages = []
     st.session_state.chat_session = None
