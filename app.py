@@ -55,24 +55,36 @@ PERSONALITY_PROMPTS = {
 # Main Body Title
 st.title("The MULTIVERSE OF CHATBOTS")
 
-# Input Form (matching the screenshot layout)
-with st.form(key="chat_form", clear_on_submit=True):
-    user_input = st.text_input("Say something:")
-    submit_button = st.form_submit_button(label="SEND")
+# Task 1: Initialize the Memory Vault
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Process submit and generate response (without keeping conversation history)
-if submit_button and user_input:
+# Task 2: Render the Chat History
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+
+# Task 3: Upgrade the Input UI
+if user_message := st.chat_input("Say something..."):
+
+    # Task 4: Save the user message to memory
+    st.session_state.messages.append({"role": "user", "content": user_message})
+    with st.chat_message("user"):
+        st.write(user_message)
+
+    # Generate and display the AI response
     try:
         with st.spinner("Thinking..."):
             response = client.models.generate_content(
                 model="gemini-flash-lite-latest",
-                contents=user_input,
+                contents=user_message,
                 config=types.GenerateContentConfig(
                     system_instruction=PERSONALITY_PROMPTS[personality]
                 )
             )
-            # Render the response
-            st.write(f"### Response from {personality}:")
+        # Task 4: Save the assistant response to memory
+        st.session_state.messages.append({"role": "assistant", "content": response.text})
+        with st.chat_message("assistant"):
             st.write(response.text)
     except Exception as e:
         st.error(f"Error generating response: {e}")
