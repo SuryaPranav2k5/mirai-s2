@@ -47,14 +47,6 @@ st.title("The AI Image Studio")
 # Input prompt
 user_prompt = st.text_input("Describe your masterpiece:")
 
-# Simple aspect ratio mapping
-if width == height:
-    aspect_ratio = "1:1"
-elif width > height:
-    aspect_ratio = "16:9"
-else:
-    aspect_ratio = "9:16"
-
 # Trigger image generation
 if user_prompt:
     if not api_key:
@@ -73,7 +65,6 @@ if user_prompt:
                     prompt=final_prompt,
                     config=types.GenerateImagesConfig(
                         number_of_images=1,
-                        aspect_ratio=aspect_ratio,
                         output_mime_type="image/jpeg",
                     )
                 )
