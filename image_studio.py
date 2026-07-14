@@ -1,5 +1,6 @@
 import streamlit as st
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 import os
 
@@ -23,6 +24,10 @@ art_style = st.sidebar.selectbox(
     ["Photorealistic", "Anime", "Oil Painting", "Watercolor", "Sketch", "Digital Art"]
 )
 
+# Width & Height Sliders
+width = st.sidebar.slider("Image Width", min_value=256, max_value=1024, value=768, step=128)
+height = st.sidebar.slider("Image Height", min_value=256, max_value=1024, value=768, step=128)
+
 # Main Page
 st.title("The AI Image Studio")
 user_prompt = st.text_input("Describe your masterpiece:")
@@ -32,9 +37,22 @@ if user_prompt:
         with st.spinner("Generating..."):
             final_prompt = f"{user_prompt}, {art_style.lower()} style"
             
+            # Simple aspect ratio mapping based on sliders
+            if width == height:
+                aspect_ratio = "1:1"
+            elif width > height:
+                aspect_ratio = "16:9"
+            else:
+                aspect_ratio = "9:16"
+                
             result = client.models.generate_images(
                 model='imagen-3.0-generate-002',
-                prompt=final_prompt
+                prompt=final_prompt,
+                config=types.GenerateImagesConfig(
+                    number_of_images=1,
+                    aspect_ratio=aspect_ratio,
+                    output_mime_type="image/jpeg"
+                )
             )
             
             # Display image directly using bytes
