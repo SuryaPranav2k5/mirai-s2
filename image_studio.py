@@ -10,61 +10,10 @@ from PIL import Image
 load_dotenv()
 
 # Page config
-st.set_page_config(page_title="The AI Image Studio", page_icon="🎨", layout="wide")
-
-# Premium Custom Styling to match the screenshot theme
-st.markdown("""
-<style>
-    /* Dark background */
-    .stApp {
-        background-color: #0d0e12;
-        color: #ffffff;
-    }
-    
-    /* Sidebar Styling */
-    section[data-testid="stSidebar"] {
-        background-color: #1a1c24;
-        border-right: 1px solid #2d3139;
-    }
-    
-    /* Text labels white */
-    .stMarkdown, p, label {
-        color: #e2e8f0 !important;
-    }
-    
-    /* Custom Sidebar Title style */
-    .sidebar-title {
-        font-size: 24px;
-        font-weight: bold;
-        color: #ffffff;
-        margin-bottom: 20px;
-    }
-    
-    /* Main Studio Title style */
-    .studio-title {
-        font-size: 42px;
-        font-weight: 800;
-        color: #ffffff;
-        margin-bottom: 5px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    /* Input description label */
-    .input-label {
-        font-size: 16px;
-        color: #a0aec0;
-        margin-bottom: 8px;
-    }
-    
-    /* Selectbox active accent border (coral/reddish) */
-    div[data-baseweb="select"] > div {
-        border-color: #ff4b4b !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="The AI Image Studio", page_icon="🎨")
 
 # Sidebar - Generation Settings
-st.sidebar.markdown('<div class="sidebar-title">Generation Settings</div>', unsafe_allow_html=True)
+st.sidebar.title("Generation Settings")
 
 # Art Style selectbox
 art_style = st.sidebar.selectbox(
@@ -93,13 +42,10 @@ user_api_key = st.sidebar.text_input("API Key (Optional)", type="password", help
 api_key = user_api_key if user_api_key else os.getenv("GEMINI_API_KEY")
 
 # Main Content
-st.markdown('<div class="studio-title">The AI Image Studio</div>', unsafe_allow_html=True)
-
-# Description label
-st.markdown('<div class="input-label">Describe your masterpiece:</div>', unsafe_allow_html=True)
+st.title("The AI Image Studio")
 
 # Input prompt
-user_prompt = st.text_input("Describe your masterpiece:", label_visibility="collapsed")
+user_prompt = st.text_input("Describe your masterpiece:")
 
 # Map selected dimensions to standard Imagen 3 aspect ratios
 def get_aspect_ratio(w, h):
