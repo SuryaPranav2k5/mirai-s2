@@ -47,13 +47,13 @@ st.title("The AI Image Studio")
 # Input prompt
 user_prompt = st.text_input("Describe your masterpiece:")
 
-# Map selected dimensions to standard Imagen 3 aspect ratios
-def get_aspect_ratio(w, h):
-    ratio = w / h
-    standards = [0.5625, 0.75, 1.0, 1.3333, 1.7777]
-    ratios = ["9:16", "3:4", "1:1", "4:3", "16:9"]
-    closest_idx = min(range(len(standards)), key=lambda i: abs(standards[i] - ratio))
-    return ratios[closest_idx]
+# Simple aspect ratio mapping
+if width == height:
+    aspect_ratio = "1:1"
+elif width > height:
+    aspect_ratio = "16:9"
+else:
+    aspect_ratio = "9:16"
 
 # Trigger image generation
 if user_prompt:
@@ -62,11 +62,10 @@ if user_prompt:
     else:
         try:
             with st.spinner("Generating your masterpiece..."):
-                client = genai.Client(api_key=api_key)
-                
                 # Incorporate art style into prompt
                 final_prompt = f"{user_prompt}, {art_style.lower()} style"
-                aspect_ratio = get_aspect_ratio(width, height)
+                
+                client = genai.Client(api_key=api_key)
                 
                 # Call Google GenAI SDK Imagen 3
                 result = client.models.generate_images(
