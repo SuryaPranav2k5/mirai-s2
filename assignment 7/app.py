@@ -268,8 +268,7 @@ else:
             
             st.image(
                 pollinations_url,
-                caption=f"Mindset Avatar ({cached.get('verdict', 'Evaluated')})",
-                use_container_width=True
+                caption=f"Mindset Avatar ({cached.get('verdict', 'Evaluated')})"
             )
             
         if st.button("🔄 Re-Analyze Day"):
@@ -278,4 +277,4 @@ else:
 
     # Raw telemetry viewer expander
     with st.expander("👀 View Raw Screentime Telemetry Table", expanded=False):
-        st.dataframe(day_df, use_container_width=True, hide_index=True)
+        st.dataframe(day_df, hide_index=True)
